@@ -8,16 +8,16 @@ import java.util.UUID;
 
 public interface RecipeService {
 
-    ResponseEntity<List<Recipes>> getAllRecipesDetails();
+    List<Recipes> getAllRecipesDetails();
 
-    ResponseEntity<Recipes> searchByRecipeId(UUID recipeId);
+    Recipes searchByRecipeId(UUID recipeId);
 
-    ResponseEntity<List<Recipes>> searchByCategory(String category);
+    List<Recipes> searchByCategory(String category);
 
-    ResponseEntity<Recipes> addRecipe(Recipes recipe);
+    Recipes addRecipe(Recipes recipe);
 
-    ResponseEntity<Recipes> updateRecipe(UUID recipeId, Recipes recipe);
+    Recipes updateRecipe(UUID recipeId, Recipes recipe);
 
-    ResponseEntity<String> removeRecipe(UUID recipeId);
+    void removeRecipe(UUID recipeId);
 
 }

@@ -1,5 +1,6 @@
 package com.abnamro.spring.data.cassandra.controller;
 
+import com.abnamro.spring.data.cassandra.exceptions.RecipeNotFoundException;
 import com.abnamro.spring.data.cassandra.model.Recipes;
 import com.abnamro.spring.data.cassandra.service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,15 @@ public class RecipeController {
     @GetMapping("/retrieveAllRecipes")
     @ResponseBody
     public ResponseEntity<List<Recipes>> getAllRecipesDetails(){
-        return recipeServiceData.getAllRecipesDetails();
+        try{
+            List recipesList =  recipeServiceData.getAllRecipesDetails();
+            if (recipesList.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(recipesList, HttpStatus.OK);
+        } catch (Exception e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -44,7 +53,13 @@ public class RecipeController {
      */
     @PostMapping("/searchByRecipeId/{recipeId}")
     public ResponseEntity<Recipes> searchByRecipeId(@PathVariable("recipeId") UUID recipeId) {
-        return recipeServiceData.searchByRecipeId(recipeId);
+        Optional<Recipes> recipeData = Optional.ofNullable(recipeServiceData.searchByRecipeId(recipeId));
+        if (recipeData.isPresent()) {
+
+            return new ResponseEntity<>(recipeData.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     /**
@@ -54,7 +69,15 @@ public class RecipeController {
      */
     @PostMapping("/searchByCategory")
     public ResponseEntity<List<Recipes>> searchByCategory(@RequestParam(required = false) String category) {
-        return recipeServiceData.searchByCategory(category);
+        try{
+            List<Recipes> recipeList =  recipeServiceData.searchByCategory(category);
+            if (recipeList.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(recipeList, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -64,7 +87,12 @@ public class RecipeController {
      */
     @PostMapping("/addNewRecipe")
     public ResponseEntity<Recipes> addRecipe(@RequestBody Recipes recipes) {
-        return recipeServiceData.addRecipe(recipes);
+        try{
+            Recipes addRecipedata = recipeServiceData.addRecipe(recipes);
+            return new ResponseEntity(addRecipedata, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -75,7 +103,12 @@ public class RecipeController {
      */
     @PutMapping("/updateRecipe/{recipeId}")
     public ResponseEntity<Recipes> updateRecipe(@PathVariable("recipeId") UUID recipeId, @RequestBody Recipes recipe) {
-        return recipeServiceData.updateRecipe(recipeId, recipe);
+        try{
+            Recipes updateRecipes = recipeServiceData.updateRecipe(recipeId, recipe);
+            return new ResponseEntity<>(updateRecipes, HttpStatus.OK);
+        } catch (Exception e) {
+            throw new RecipeNotFoundException("Recipe not found for recipe no " + recipeId);
+        }
     }
 
     /**
@@ -85,7 +118,12 @@ public class RecipeController {
      */
     @DeleteMapping("/removeRecipe/{recipeId}")
     public ResponseEntity<String> removeRecipe(@PathVariable("recipeId") UUID recipeId) {
-        return recipeServiceData.removeRecipe(recipeId);
+        try{
+            recipeServiceData.removeRecipe(recipeId);
+            return new ResponseEntity<>("Successfully Deleted", HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }
